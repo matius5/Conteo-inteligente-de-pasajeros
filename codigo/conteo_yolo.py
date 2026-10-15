@@ -1,18 +1,21 @@
 """Prototipo de conteo por línea con tracking YOLO. Validar sobre videos reales."""
 import argparse
 import json
-from collections import defaultdict
 import cv2
 from ultralytics import YOLO
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--camera', type=int, default=0)
-    p.add_argument('--line-y', type=int, default=250)
+    p.add_argument('--line-y', type=int, default=None, help='Línea horizontal (coordenada Y)')
+    p.add_argument('--line-x', type=int, default=None, help='Línea vertical (coordenada X)')
     p.add_argument('--model', default='yolo11n.pt')
     p.add_argument('--serial-port', default=None)
     p.add_argument('--baud', type=int, default=115200)
     a = p.parse_args()
+    if a.line_x is not None and a.line_y is not None:
+        p.error('Utiliza solo --line-x o --line-y')
+    horizontal = a.line_x is None
     ser = None
     if a.serial_port:
         import serial
@@ -29,17 +32,17 @@ def main():
             if not ok:
                 break
             h, w = frame.shape[:2]
-            yline = min(max(a.line_y, 0), h-1)
+            line = min(max((a.line_y if a.line_y is not None else h//2) if horizontal else a.line_x, 0), (h-1 if horizontal else w-1))
             result = model.track(frame, persist=True, classes=[0], conf=0.35, verbose=False)[0]
             boxes = result.boxes
             if boxes is not None and boxes.id is not None:
                 ids = boxes.id.int().cpu().tolist()
                 xyxy = boxes.xyxy.cpu().tolist()
                 for tid, (x1, y1, x2, y2) in zip(ids, xyxy):
-                    center_y = (y1 + y2) / 2
-                    side = -1 if center_y < yline else 1
+                    center = (y1 + y2) / 2 if horizontal else (x1 + x2) / 2
+                    side = -1 if center < line else 1
                     old = last_side.get(tid)
-                    # Convención provisional: arriba -> abajo significa entrada
+                    # Convención provisional: arriba->abajo o izquierda->derecha = entrada
                     if old is not None and old != side:
                         if old == -1 and side == 1:
                             entries += 1
@@ -54,7 +57,10 @@ def main():
                     cv2.rectangle(frame, (int(x1),int(y1)), (int(x2),int(y2)), (0,255,0),2)
                     cv2.putText(frame, f'ID {tid}', (int(x1),max(20,int(y1)-5)),
                                 cv2.FONT_HERSHEY_SIMPLEX,.55,(0,255,0),2)
-            cv2.line(frame,(0,yline),(w,yline),(255,200,0),2)
+            if horizontal:
+                cv2.line(frame,(0,line),(w,line),(255,200,0),2)
+            else:
+                cv2.line(frame,(line,0),(line,h),(255,200,0),2)
             cv2.putText(frame, f'Ent: {entries} Sal: {exits} Ocup: {max(0,entries-exits)}',
                         (12,32), cv2.FONT_HERSHEY_SIMPLEX,.7,(255,255,255),2)
             cv2.imshow('Conteo de pasajeros - prototipo',frame)
