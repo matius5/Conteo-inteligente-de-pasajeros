@@ -37,7 +37,7 @@ flowchart LR
 **Importante:** una línea horizontal supone que el movimiento relevante ocurre verticalmente en la imagen. La orientación entrada/salida debe verificarse con videos reales. Oclusiones, cambios de ID y embarque simultáneo pueden provocar errores.
 
 ## 6. Organización
-- [`codigo/conteo_yolo.py`](codigo/conteo_yolo.py): prototipo de seguimiento y conteo (**nuevo, no probado con tu cámara**).
+- [`codigo/conteo_yolo.py`](codigo/conteo_yolo.py): prototipo de seguimiento y conteo 
 - [`codigo/enviar_serial.py`](codigo/enviar_serial.py): emisor opcional de mensajes JSON a ESP32.
 - [`codigo/esp32_oled/esp32_oled.ino`](codigo/esp32_oled/esp32_oled.ino): ejemplo Arduino ESP32 OLED, sujeto a confirmar pantalla y pines.
 - [`documentacion/avances.md`](documentacion/avances.md): bitácora de avances.
