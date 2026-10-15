@@ -9,8 +9,8 @@
 ## Lo implementado en `codigo/conteo_yolo.py`
 
 - Modelo por defecto: **`yolo11n.pt`**, configurable con `--model`.
-- Línea de referencia **horizontal**: `--line-y 250`, configurable.
-- Sentido provisional de entrada: desplazamiento de arriba hacia abajo.
+- Línea configurable: **horizontal** (`--line-y 250`) o **vertical** (`--line-x 320`). Si no se indica ninguna, se utiliza una horizontal centrada.
+- Sentido provisional de entrada: arriba hacia abajo (horizontal) o izquierda hacia derecha (vertical).
 - Conteo basado en cambios de lado por ID de seguimiento.
 - Mensaje JSON por serial si se facilita `--serial-port`.
 
@@ -22,4 +22,4 @@
 4. Verificar la estabilidad de IDs, los cruces múltiples y la tasa real de error.
 5. Actualizar el informe cuando se disponga de evidencia, sin atribuir resultados al programa de referencia.
 
-**Nota:** cambiar `--model` no cambia la orientación de la línea.
+**Nota:** cambiar `--model` no cambia la orientación de la línea; utiliza `--line-x` o `--line-y`. Este ajuste de código aún necesita validación experimental.
