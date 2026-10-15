@@ -75,7 +75,7 @@ El primer arranque puede requerir descargar el modelo `yolo11n.pt` desde Ultraly
 - [Informe ABPr completo — Corte 2, Avance 2](documentacion/ABPr_Avance_2.md)
 - [Bitácora de avances](documentacion/avances.md)
 - [Guía para añadir evidencias reales](documentacion/GUIA_EVIDENCIAS.md)
-- [Aclaración de versiones de YOLO y orientación de la línea](documentacion/COMPATIBILIDAD_MODELOS.md)
+
 
 Las imágenes del esquemático, PCB o funcionamiento del sistema solo se publicarán como resultados una vez que el equipo las haya producido y verificado.
 
