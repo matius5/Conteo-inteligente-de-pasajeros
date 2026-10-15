@@ -1,6 +1,10 @@
 # Sistema inteligente para conteo de pasajeros en un bus
 **Asignatura:** Sistemas Inteligentes para Electrónica · **Modalidad:** ABPr
 
+## Informe académico del proyecto ABPr
+Corte 2 — Avance 2
+Consultar informe completo del ABPr
+
 > **Estado:** prototipo de visión artificial probado previamente en un computador, según los avances reportados por el equipo. Este repositorio contiene una **implementación de referencia nueva** y no sustituye el código exacto que ya desarrollaron. Raspberry Pi, ESP32 y pantalla OLED requieren integración y pruebas físicas.
 
 ## 1. Problema
@@ -67,3 +71,4 @@ El primer arranque puede requerir descargar el modelo `yolo11n.pt` desde Ultraly
 
 ## 10. Resultados y conclusiones
 **Pendientes de medición y documentación.** No se atribuyen métricas sin evidencia.
+
