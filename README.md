@@ -3,7 +3,7 @@
 
 ## Informe académico del proyecto ABPr
 Corte 2 — Avance 2
-Consultar informe completo del ABPr
+[Consultar informe completo del ABPr](https://github.com/matius5/Conteo-inteligente-de-pasajeros/blob/main/documentacion/ABPr_Avance_2.md)
 
 > **Estado:** prototipo de visión artificial probado previamente en un computador, según los avances reportados por el equipo. Este repositorio contiene una **implementación de referencia nueva** y no sustituye el código exacto que ya desarrollaron. Raspberry Pi, ESP32 y pantalla OLED requieren integración y pruebas físicas.
 
