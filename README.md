@@ -37,7 +37,7 @@ flowchart LR
 
 El equipo reportó una **prueba inicial de detección en el portátil con YOLOv8**. El archivo `codigo/conteo_yolo.py` incluido aquí es una **implementación de referencia posterior**, cuya configuración por defecto usa `yolo11n.pt` y una **línea horizontal** (`--line-y`). Por su parte, el informe ABPr describe como propuesta una **línea vertical** (`linea_x`).
 
-Esto no debe interpretarse como pruebas completadas con ambos modelos ni como evidencia de que ambas orientaciones funcionen: antes de integrar el sistema debe seleccionarse la orientación según la cámara real y validar el conteo. El modelo del código se puede cambiar mediante `--model yolov8n.pt`, pero esa opción por sí sola no convierte la línea horizontal en vertical.
+Esto no debe interpretarse como pruebas completadas con ambos modelos ni como evidencia de que ambas orientaciones funcionen: antes de integrar el sistema debe seleccionarse la orientación según la cámara real y validar el conteo. El modelo del código se puede cambiar mediante `--model yolov8n.pt`, y la orientación de la línea se configura por separado mediante `--line-x` o `--line-y`.
 
 Para evitar inconsistencias, se conserva el informe académico como documento del avance y se identifica este programa explícitamente como referencia sin validación experimental.
 
@@ -45,10 +45,10 @@ Para evitar inconsistencias, se conserva el informe académico como documento de
 1. Capturar fotogramas con OpenCV.
 2. Detectar personas con un modelo YOLO preentrenado.
 3. Seguir cada persona por identificador para comparar su posición entre fotogramas.
-4. Registrar el cruce de una línea horizontal; sumar entrada o salida según la dirección calibrada.
+4. Registrar el cruce de una línea horizontal (por defecto) o vertical (`--line-x`); sumar entrada o salida según la dirección calibrada.
 5. Estimar la ocupación con el conteo de entradas y salidas (el prototipo aplica `max(0, entradas - salidas)`); registrar también una ocupación inicial cuando se valide en el autobús. Enviar eventos por puerto serial a la ESP32 si esta está conectada.
 
-**Importante:** una línea horizontal supone que el movimiento relevante ocurre verticalmente en la imagen. La orientación entrada/salida debe verificarse con videos reales. Oclusiones, cambios de ID y embarque simultáneo pueden provocar errores.
+**Importante:** el prototipo permite configurar una línea horizontal o vertical. Una línea horizontal supone que el movimiento relevante ocurre verticalmente en la imagen. La orientación entrada/salida debe verificarse con videos reales. Oclusiones, cambios de ID y embarque simultáneo pueden provocar errores.
 
 ## 6. Organización
 - [`codigo/conteo_yolo.py`](codigo/conteo_yolo.py): prototipo de seguimiento y conteo 
@@ -65,6 +65,8 @@ python -m venv .venv
 # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 python codigo/conteo_yolo.py --camera 0 --line-y 250
+# Alternativa con línea vertical:
+# python codigo/conteo_yolo.py --camera 0 --line-x 320
 ```
 El primer arranque puede requerir descargar el modelo `yolo11n.pt` desde Ultralytics. Para emitir datos por serial, agrega `--serial-port COM3` (ajusta puerto según el equipo). No ejecutes código de ESP32 hasta revisar pines, pantalla, librerías y alimentación.
 
