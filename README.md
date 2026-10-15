@@ -63,7 +63,7 @@ El primer arranque puede requerir descargar el modelo `yolo11n.pt` desde Ultraly
 - [ ] Esquemático y PCB KiCad verificables.
 
 ## 9. Consideraciones
-Evitar publicar videos con rostros identificables sin autorización. No subir credenciales, claves Wi-Fi ni tokens.
+....
 
 ## 10. Resultados y conclusiones
 **Pendientes de medición y documentación.** No se atribuyen métricas sin evidencia.
