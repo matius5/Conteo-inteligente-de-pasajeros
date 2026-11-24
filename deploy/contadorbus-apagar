@@ -1,0 +1,5 @@
+#!/bin/sh
+# Instalado root:root, no modificable por el servicio. No admite argumentos.
+set -eu
+[ "$#" -eq 0 ] || exit 64
+exec /usr/bin/systemctl --no-block poweroff

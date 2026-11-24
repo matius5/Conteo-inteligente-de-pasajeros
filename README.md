@@ -1,95 +1,100 @@
-# Sistema inteligente para conteo de pasajeros en un bus
-**Asignatura:** Sistemas Inteligentes para Electrónica · **Modalidad:** ABPr
+# Conteo inteligente de pasajeros
 
-## Informe académico del proyecto ABPr
-Corte 2 — Avance 2
-[Consultar informe completo del ABPr](https://github.com/matius5/Conteo-inteligente-de-pasajeros/blob/main/documentacion/ABPr_Avance_2.md)
+Contador para Raspberry Pi 4 con cámara USB, YOLOv8n/NCNN, seguimiento ByteTrack y panel web para celular. Funciona sin ESP32, monitor ni teclado. Cuenta entradas y salidas al cruzar una línea virtual. Al iniciar cada proceso, los contadores comienzan en cero.
 
+## Instalar después de preparar la Raspberry Pi
 
+Instalar primero Debian 13 / Raspberry Pi OS Trixie **de 64 bits**, con Python 3.13, configurar Wi-Fi y conectar la cámara. El entorno de referencia es Raspberry Pi 4 de 4 GB y cámara LG AN-VC500. Ejecutar como usuario normal con permiso sudo:
 
-> **Estado:** prototipo de visión artificial probado previamente en un computador, según los avances reportados por el equipo. Este repositorio contiene una **implementación de referencia nueva** y no sustituye el código exacto que ya desarrollaron. Raspberry Pi, ESP32 y pantalla OLED requieren integración y pruebas físicas.
-
-## 1. Problema
-Determinar el número de personas que ingresan y salen de un bus mediante una cámara situada en la zona de acceso, evitando contar repetidamente a la misma persona.
-
-## 2. Objetivo
-Detectar y seguir personas, identificar cruces de una línea virtual y calcular la ocupación estimada, mostrando el resultado en una pantalla conectada a una ESP32.
-
-## 3. Arquitectura propuesta
-```mermaid
-flowchart LR
-    A[Cámara USB] --> B[Raspberry Pi 4 - 4 GB]
-    B --> C[YOLO + seguimiento por ID]
-    C --> D[Conteo de cruces]
-    D --> E[USB serial JSON]
-    E --> F[ESP32]
-    F --> G[Pantalla OLED I2C]
-```
-
-## 4. Hardware
-- Raspberry Pi 4 (4 GB) como candidato de procesamiento (aún por validar rendimiento).
-- Cámara USB, modelo por confirmar.
-- ESP32, placa exacta y mapeo de pines pendientes de confirmar.
-- Pantalla OLED I2C; controlador y dirección I2C pendientes de verificar.
-- Fuente(s) de alimentación y cableado adecuados.
-
-### Diferencia entre el avance original y este código de referencia
-
-El equipo reportó una **prueba inicial de detección en el portátil con YOLOv8**. El archivo `codigo/conteo_yolo.py` incluido aquí es una **implementación de referencia posterior**, cuya configuración por defecto usa `yolo11n.pt` y una **línea horizontal** (`--line-y`). Por su parte, el informe ABPr describe como propuesta una **línea vertical** (`linea_x`).
-
-Esto no debe interpretarse como pruebas completadas con ambos modelos ni como evidencia de que ambas orientaciones funcionen: antes de integrar el sistema debe seleccionarse la orientación según la cámara real y validar el conteo. El modelo del código se puede cambiar mediante `--model yolov8n.pt`, y la orientación de la línea se configura por separado mediante `--line-x` o `--line-y`.
-
-Para evitar inconsistencias, se conserva el informe académico como documento del avance y se identifica este programa explícitamente como referencia sin validación experimental.
-
-## 5. Algoritmo
-1. Capturar fotogramas con OpenCV.
-2. Detectar personas con un modelo YOLO preentrenado.
-3. Seguir cada persona por identificador para comparar su posición entre fotogramas.
-4. Registrar el cruce de una línea horizontal (por defecto) o vertical (`--line-x`); sumar entrada o salida según la dirección calibrada.
-5. Estimar la ocupación con el conteo de entradas y salidas (el prototipo aplica `max(0, entradas - salidas)`); registrar también una ocupación inicial cuando se valide en el autobús. Enviar eventos por puerto serial a la ESP32 si esta está conectada.
-
-**Importante:** el prototipo permite configurar una línea horizontal o vertical. Una línea horizontal supone que el movimiento relevante ocurre verticalmente en la imagen. La orientación entrada/salida debe verificarse con videos reales. Oclusiones, cambios de ID y embarque simultáneo pueden provocar errores.
-
-## 6. Organización
-- [`codigo/conteo_yolo.py`](codigo/conteo_yolo.py): prototipo de seguimiento y conteo 
-- [`codigo/enviar_serial.py`](codigo/enviar_serial.py): emisor opcional de mensajes JSON a ESP32.
-- [`codigo/esp32_oled/esp32_oled.ino`](codigo/esp32_oled/esp32_oled.ino): ejemplo Arduino ESP32 OLED, sujeto a confirmar pantalla y pines.
-- [`documentacion/avances.md`](documentacion/avances.md): bitácora de avances.
-- [`hardware/`](hardware/): lugar reservado para esquemático y PCB KiCad reales.
-- [`evidencias/`](evidencias/): fotografías, videos y capturas.
-
-## 7. Ejecución en PC (prototipo)
 ```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt
-python codigo/conteo_yolo.py --camera 0 --line-y 250
-# Alternativa con línea vertical:
-# python codigo/conteo_yolo.py --camera 0 --line-x 320
+sudo apt update
+sudo apt install -y git
+cd ~
+git clone https://github.com/matius5/Conteo-inteligente-de-pasajeros.git
+cd Conteo-inteligente-de-pasajeros
+bash instalar.sh
 ```
-El primer arranque puede requerir descargar el modelo `yolo11n.pt` desde Ultralytics. Para emitir datos por serial, agrega `--serial-port COM3` (ajusta puerto según el equipo). No ejecutes código de ESP32 hasta revisar pines, pantalla, librerías y alimentación.
 
-## 8. Evidencias y trazabilidad
+No necesitas GitHub Desktop ni iniciar sesión en GitHub para descargar este repositorio público. Si la carpeta ya existe, no la borres: conserva sus cambios y usa otro nombre para la descarga. La secuencia anterior está pensada para un sistema limpio.
 
-- [Informe ABPr completo — Corte 2, Avance 2](documentacion/ABPr_Avance_2.md)
-- [Bitácora de avances](documentacion/avances.md)
-- [Guía para añadir evidencias reales](documentacion/GUIA_EVIDENCIAS.md)
+El instalador crea `.venv`, instala las versiones principales registradas, descarga YOLOv8n si hace falta, lo exporta a NCNN a 320 píxeles, comprueba una inferencia y la cámara, e instala el servicio `contadorbus.service`. Espera hasta recibir datos activos del panel antes de informar que terminó. Necesita Internet y puede tardar varios minutos. Si falla una dependencia o una comprobación, se detiene y muestra el error.
 
+No es una imagen de la microSD ni una restauración probada en hardware desde este entorno. Conserva el sistema actual hasta probar esta instalación, preferiblemente en otra tarjeta. Los pesos y los paquetes se descargan: este repositorio por sí solo no permite instalar sin Internet.
 
-Las imágenes del esquemático, PCB o funcionamiento del sistema solo se publicarán como resultados una vez que el equipo las haya producido y verificado.
+## Consultar el conteo
 
-## 9. Evidencias que faltan por subir
-- [ ] Código original YOLO desarrollado por el equipo.
-- [ ] Capturas y video de prueba en la cámara del computador.
-- [ ] Pruebas de conteo de entrada/salida y tasa de error.
-- [ ] Prueba del sistema en Raspberry Pi 4.
-- [ ] Capturas o fotos de pantalla OLED con ocupación.
-- [ ] Esquemático y PCB KiCad verificables.
+```bash
+hostname -I
+```
 
-## 10. Consideraciones
-....
+Desde un celular en la misma red, abrir `http://IP_DE_LA_RASPBERRY:8080`. El panel muestra entradas, salidas, ocupación y FPS. El botón **Apagar Raspberry** solicita el apagado del sistema sin contraseña ni confirmación adicional. Esperar a que finalice antes de desconectar la corriente. Perder acceso a la página no demuestra por sí solo que haya terminado.
 
-## 11. Resultados y conclusiones
-**Pendientes de medición y documentación.** No se atribuyen métricas sin evidencia.
+La página y la acción de apagado son para una red de confianza o Tailscale; cualquier dispositivo con acceso al panel puede solicitar el apagado. No reenviar el puerto 8080 hacia Internet.
 
+## Acceso por Tailscale
+
+```bash
+bash instalar_tailscale.sh
+```
+
+Abrir el enlace de autenticación que aparezca, incorporar la Raspberry a tu cuenta y usar esa misma red Tailscale en el celular. Luego abrir `http://IP_TAILSCALE:8080`. La sesión y claves de Tailscale no se guardan en GitHub. Después de reinstalar hay que autenticar el equipo de nuevo. Tailscale no conecta por sí solo la Raspberry a una Wi-Fi desconocida.
+
+## Arranque, diagnóstico y ejecución manual
+
+El servicio inicia automáticamente al encender. Si el proceso falla, intenta recuperarse y empieza una nueva sesión en cero. Los eventos históricos permanecen en `registros/`, pero no restauran la ocupación.
+
+```bash
+systemctl status contadorbus.service --no-pager
+journalctl -u contadorbus.service -n 60 --no-pager
+```
+
+Para ejecutar en la terminal y detener con Ctrl+C:
+
+```bash
+sudo systemctl stop contadorbus.service
+bash iniciar_web.sh
+```
+
+Para volver al servicio automático:
+
+```bash
+sudo systemctl start contadorbus.service
+```
+
+Configuración inicial: `/dev/video0`, MJPG 640×480, modelo NCNN, inferencia 320 px, línea vertical x=320, entrada de izquierda a derecha. Cambiar los argumentos de `iniciar_web.sh` según el encuadre y reiniciar el servicio. No ejecutar dos contadores a la vez sobre la cámara.
+
+## Archivos principales
+
+- `codigo/contador_web.py`: cámara, detección, seguimiento, conteo y registros.
+- `codigo/line_counter.py`: lógica del cruce de línea.
+- `codigo/panel_bus.py`: servidor y panel móvil, con apagado.
+- `codigo/probar_camara.py`: prueba de captura MJPG.
+- `codigo/preparar_modelo.py`: exportación y comprobación del modelo.
+- `instalar.sh`: instalación y servicio para el usuario y ruta actuales.
+- `deploy/`: servicio y comando limitado de apagado.
+- `pruebas/test_sistema.py`: pruebas sin cámara y sin apagar el equipo.
+
+Los archivos de serial, ESP32 y `documentacion/README_ETAPA_ESP32.md` se conservan como historial del proyecto. La instalación web actual no los utiliza. Las notas antiguas dentro de `documentacion/` pueden describir aquella etapa.
+
+## Qué está recuperado y qué es nuevo
+
+El contador, la lógica de cruces, la prueba de cámara y la base del panel proceden de los archivos conservados del proyecto. El instalador y la integración de apagado de esta publicación se prepararon para facilitar una reinstalación. No se recuperó el archivo exacto del botón de apagado que estaba instalado en la Raspberry; esta integración es nueva y debe probarse físicamente.
+
+Las versiones principales de `requirements.txt` proceden del entorno informado por el equipo; no equivalen a un bloqueo completo de todas las dependencias. El instalador guarda el entorno resuelto en `registros/requirements-instalados.txt`. El repositorio no incluye una copia de credenciales, redes Wi-Fi, configuración personal del sistema, pesos locales ni cambios que solo existan en la Raspberry.
+
+La comprobación local de esta publicación cubre sintaxis y pruebas de conteo/HTTP con apagado simulado. No verifica cámara, inferencia ARM, permisos sudo, apagado físico ni restauración de una tarjeta real. Prueba antes de borrar el sistema original: acceso al panel, cruces conocidos, apagado, nuevo arranque sin periféricos y acceso remoto.
+
+```bash
+python3 -m unittest discover -s pruebas -v
+```
+
+## Resultados y alcance
+
+Registros aportados: 3,98 FPS con PyTorch (240 fotogramas / 60,2 s) y 6,11 FPS con NCNN (2108 / 345,2 s). Son sesiones distintas, no un ensayo controlado. No hay referencia manual suficiente para afirmar un porcentaje de precisión. Se conservan valores negativos para detectar inconsistencias. La ocupación solo representa el total cuando la condición inicial y todos los accesos están controlados.
+
+## Referencias
+
+- [Ultralytics en Raspberry Pi](https://docs.ultralytics.com/guides/raspberry-pi/)
+- [Exportación NCNN](https://docs.ultralytics.com/integrations/ncnn/)
+- [Instalación de Tailscale](https://tailscale.com/download/linux)
+- Licencias de modelos y dependencias: consultar `LICENSE_NOTES.md` y los proyectos originales.

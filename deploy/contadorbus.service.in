@@ -1,0 +1,22 @@
+[Unit]
+Description=Contador de pasajeros y panel web
+After=local-fs.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=@USER@
+SupplementaryGroups=video
+WorkingDirectory=@PROJECT@
+ExecStart=/bin/bash @PROJECT@/iniciar_web.sh
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+Environment=PYTHONUNBUFFERED=1
+# El único comando privilegiado permitido está en sudoers: contadorbus-apagar sin argumentos.
+NoNewPrivileges=false
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,10 @@
-opencv-python>=4.8,<5
-ultralytics>=8.3,<9
-pyserial>=3.5,<4
+# Versiones principales observadas en la Raspberry Pi (Debian 13, Python 3.13).
+# No es un pip freeze completo: dependencias transitivas se resuelven al instalar.
+ultralytics==8.4.202
+torch==2.8.0
+torchvision==0.23.0
+opencv-python==4.12.0.88
+ncnn==1.0.20261020
+pyserial==3.5
+lap==0.5.12
+pnnx==20260526
